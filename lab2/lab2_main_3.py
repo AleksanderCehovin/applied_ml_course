@@ -2,6 +2,7 @@
 # This code will need tensorflow and matplotlib to be installed. Use pip to install them.
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import urllib
 
 # Variables
 IMG_SIZE = 150
@@ -45,30 +46,53 @@ val_ds = val_datageneration.flow_from_directory(
   batch_size=batch_size,
   class_mode='binary')
 
-#val_ds = tf.keras.preprocessing.image_dataset_from_directory(
-#  'images/validation',
-#  image_size=(IMG_SIZE, IMG_SIZE),
-#  batch_size=batch_size)
 
 # Define the model
-model = tf.keras.models.Sequential([
-    tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu', 
-                           input_shape=(IMG_SIZE,IMG_SIZE,3)),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(128, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(256, 3, padding='same', activation='relu'),
-    tf.keras.layers.Conv2D(256, 3, padding='same', activation='relu'),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(256, activation='relu'),
-    tf.keras.layers.Dropout(0.4),
-    #tf.keras.layers.Dense(2)
-    tf.keras.layers.Dense(1,activation='sigmoid')
-])
+weights_url = "https://storage.googleapis.com/mledu-datasets/inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5"
+weights_file = "inception_v3.h5"
+urllib.request.urlretrieve(weights_url, weights_file)
+
+pre_trained_model = tf.keras.applications.inception_v3.InceptionV3(
+                                input_shape=(IMG_SIZE,IMG_SIZE,3),
+                                include_top=False,
+                                weights=None)
+pre_trained_model.load_weights(weights_file)
+#pre_trained_model.summary()
+
+for layer in pre_trained_model.layers:
+    layer.trainable = False
+
+last_layer = pre_trained_model.get_layer('mixed7')
+#print('last layer output shape: ', last_layer.output_shape)
+last_output = last_layer.output
+
+x = tf.keras.layers.Flatten()(last_output)
+
+x = tf.keras.layers.Dense(1024, activation='relu')(x)
+
+x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+
+model = tf.keras.Model(pre_trained_model.input, x)
+
+
+
+#model = tf.keras.models.Sequential([
+#    tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu', 
+#                           input_shape=(IMG_SIZE,IMG_SIZE,3)),
+#    tf.keras.layers.MaxPooling2D(),
+#    tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
+#    tf.keras.layers.MaxPooling2D(),
+#    tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
+#    tf.keras.layers.MaxPooling2D(),
+#    tf.keras.layers.Conv2D(128, 3, padding='same', activation='relu'),
+#    tf.keras.layers.MaxPooling2D(),
+#    tf.keras.layers.Conv2D(256, 3, padding='same', activation='relu'),
+#    tf.keras.layers.Conv2D(256, 3, padding='same', activation='relu'),
+#    tf.keras.layers.Flatten(),
+#    tf.keras.layers.Dense(256, activation='relu'),
+#    tf.keras.layers.Dropout(0.4),
+#    tf.keras.layers.Dense(1,activation='sigmoid')
+#])
 #model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
 model.compile(optimizer='rmsprop', loss="binary_crossentropy", metrics=['accuracy'])
 
