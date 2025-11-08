@@ -25,11 +25,6 @@ def run():
         batch_size=batch_size,
         class_mode='binary')
 
-    #train_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    #  'images/train',
-    #  image_size=(IMG_SIZE, IMG_SIZE),
-    #  batch_size=batch_size)
-
     # Create validation dataset
     val_datageneration = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1.0/255,
@@ -45,11 +40,6 @@ def run():
         target_size=(IMG_SIZE, IMG_SIZE),
         batch_size=batch_size,
         class_mode='binary')
-
-    #val_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    #  'images/validation',
-    #  image_size=(IMG_SIZE, IMG_SIZE),
-    #  batch_size=batch_size)
 
     # Define the model
     model = tf.keras.models.Sequential([
@@ -71,7 +61,6 @@ def run():
         #tf.keras.layers.Dense(1,activation='sigmoid')
     ])
     model.compile(optimizer='rmsprop', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
-    #model.compile(optimizer='rmsprop', loss="binary_crossentropy", metrics=['accuracy'])
 
     # Print a summary of the whole model
     model.summary()

@@ -41,7 +41,6 @@ def run():
         #tf.keras.layers.Dense(1,activation='sigmoid')
     ])
     model.compile(optimizer='rmsprop', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
-    #model.compile(optimizer='rmsprop', loss="binary_crossentropy", metrics=['accuracy'])
 
     # Print a summary of the whole model
     model.summary()
