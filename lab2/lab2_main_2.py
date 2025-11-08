@@ -67,11 +67,11 @@ def run():
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(256, activation='relu'),
         tf.keras.layers.Dropout(0.4),
-        #tf.keras.layers.Dense(2)
-        tf.keras.layers.Dense(1,activation='sigmoid')
+        tf.keras.layers.Dense(2)
+        #tf.keras.layers.Dense(1,activation='sigmoid')
     ])
-    #model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
-    model.compile(optimizer='rmsprop', loss="binary_crossentropy", metrics=['accuracy'])
+    model.compile(optimizer='rmsprop', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
+    #model.compile(optimizer='rmsprop', loss="binary_crossentropy", metrics=['accuracy'])
 
     # Print a summary of the whole model
     model.summary()

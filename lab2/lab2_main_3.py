@@ -7,8 +7,7 @@ import urllib
 # Variables
 IMG_SIZE = 150
 batch_size = 32
-#epochs = 40
-epochs = 7
+epochs = 40
 
 def run():
     # Create train dataset
@@ -72,7 +71,8 @@ def run():
 
     x = tf.keras.layers.Dense(1024, activation='relu')(x)
 
-    x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+    #x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+    x = tf.keras.layers.Dense(2)(x)
 
     model = tf.keras.Model(pre_trained_model.input, x)
 
@@ -95,8 +95,9 @@ def run():
     #    tf.keras.layers.Dropout(0.4),
     #    tf.keras.layers.Dense(1,activation='sigmoid')
     #])
-    #model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
-    model.compile(optimizer='rmsprop', loss="binary_crossentropy", metrics=['accuracy'])
+    model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
+    #model.compile(optimizer='rmsprop', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
+    #model.compile(optimizer='rmsprop', loss="binary_crossentropy", metrics=['accuracy'])
 
     # Print a summary of the whole model
     model.summary()
