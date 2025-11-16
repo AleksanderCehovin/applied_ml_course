@@ -4,11 +4,11 @@ Source code for Applied Machine Learning course.
 
 Expect to add labs here and maybe other useful info, like CUDA setup.
 
-###lab1/### 
+### lab1/ 
 Basic application of neural networks on 1D functions
 
 
-###lab2/###
+### lab2/
 Simple classification of a Dog vs Cat image dataset. Improvements in steps up to >95% validation accuracy.
 
 
