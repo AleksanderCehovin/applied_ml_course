@@ -12,5 +12,5 @@ Basic application of neural networks on 1D functions
 Simple classification of a Dog vs Cat image dataset. Improvements in steps up to >95% validation accuracy.
 
 
-###project/###
+### project/
 Personal course project. Currently looks like the theme is autoencoders and compression. 
