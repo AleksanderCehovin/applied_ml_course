@@ -9,13 +9,13 @@ import dataset
 import lib
 
 # Variables
-epochs = 30
+epochs = 5
 batch_size=32
 
 def load_data() -> dict:
     return dataset.get_data(batch_size=batch_size,is_autoencoder=True)
 
-def run() -> None:
+def run(dataset) -> None:
     dataset = load_data()    
     train_ds = dataset["train"]
     validate_ds = dataset["validate"]
@@ -43,27 +43,17 @@ def run() -> None:
     )
     # Save the trained model for later
     model.save('saved_model.keras')
-
-    return history
+    
+    return model, history
 
 def plot(history) -> None:
-    # Visualize the accuracy and loss plots
-    #acc = history.history['accuracy']
-    #val_acc = history.history['val_accuracy']
-
+    # Visualize loss plots. No accuracy for autoencoder case
     loss = history.history['loss']
     val_loss = history.history['val_loss']
 
     epochs_range = range(epochs)
 
     plt.figure(figsize=(8, 8))
-    #plt.subplot(1, 2, 1)
-    #plt.plot(epochs_range, acc, label='Training Accuracy')
-    #plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-    #plt.legend(loc='lower right')
-    #plt.title('Training and Validation Accuracy')
-
-    #plt.subplot(1, 2, 2)
     plt.plot(epochs_range, loss, label='Training Loss')
     plt.plot(epochs_range, val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
@@ -71,9 +61,39 @@ def plot(history) -> None:
     plt.show()
 
 
+def plot_reconstruction_examples(model, dataset, N=5):
+    assert N < batch_size, "N must be smaller than a batch_size"
+    
+    # Randomize images so we don't check the same ones every time
+    examples=dataset.shuffle(10000).take(1)
+
+    for image, image in examples:
+        preds = model.predict(image)
+        #print(f"preds.shape {preds.shape}")
+        #print(f"image.shape {image.shape}")
+
+    plt.figure(figsize=(2*N,4))
+    for i in range(0,N):
+        # Original image
+        ax = plt.subplot(2,N,i+1)
+        plt.imshow(image[i].numpy().squeeze(), cmap="gray")
+        plt.title("original")
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+
+        # Predicted image
+        ax = plt.subplot(2, N, i+1+N)
+        plt.imshow(preds[i], cmap="gray")
+        plt.title("reconstructed")
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+    plt.show()
+
 def run_all() -> None:
-    history=run()
+    dataset = load_data()
+    model, history=run(dataset)
     plot(history)
+    plot_reconstruction_examples(model, dataset['test'], 10)
 
 
 if __name__ == "__main__":
