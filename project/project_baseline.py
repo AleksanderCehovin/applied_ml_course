@@ -1,5 +1,8 @@
-# DT075A Laboration 2
-# This code will need tensorflow and matplotlib to be installed. Use pip to install them.
+################################################################################### 
+# Basic supervised learning classification example from previous laborations.
+# This baseline uses tensorflow_datasets for training data, and this example shows
+# changes needed to run previous known models with this new API. 
+###################################################################################
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,7 +11,7 @@ import dataset
 import lib
 
 # Variables
-epochs = 40
+epochs = 10
 batch_size=32
 
 def load_data() -> dict:
@@ -31,7 +34,9 @@ def run() -> None:
         tf.keras.layers.Input((IMG_X,IMG_Y,IMG_CHANNELS)),
         tf.keras.layers.Rescaling(1./255),
         tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
         tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dense(10)
