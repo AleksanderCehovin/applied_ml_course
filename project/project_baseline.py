@@ -42,8 +42,6 @@ def run() -> None:
         tf.keras.layers.Dense(10)
     ])
 
-    print(f"Model.output={model.outputs}")
-
     model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
 
     # Print a summary of the whole model

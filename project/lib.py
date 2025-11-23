@@ -11,7 +11,7 @@ class Autoencoder(tf.keras.Model):
     self.shape = shape
     self.encoder = tf.keras.Sequential([
       tf.keras.layers.Input(shape),
-      tf.keras.layers.Rescaling(1./255),
+      #tf.keras.layers.Rescaling(1./255),
       tf.keras.layers.Flatten(),
       tf.keras.layers.Dense(latent_dim, activation='relu'),
     ])
