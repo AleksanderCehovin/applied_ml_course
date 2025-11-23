@@ -8,11 +8,11 @@ import dataset
 import lib
 
 # Variables
-epochs = 40
+epochs = 10
 batch_size=32
 
 def load_data() -> dict:
-    return dataset.get_data(batch_size)
+    return dataset.get_data(batch_size=batch_size,is_autoencoder=True)
 
 def run() -> None:
     dataset = load_data()    
@@ -26,20 +26,10 @@ def run() -> None:
     IMG_CHANNELS = train_ds.element_spec[0].shape[3]
     print(f"Shape {train_ds.element_spec[0].shape}")
 
-    # Define the model
-    model = tf.keras.models.Sequential([
-        tf.keras.layers.Input((IMG_X,IMG_Y,IMG_CHANNELS)),
-        tf.keras.layers.Rescaling(1./255),
-        tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
-        tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dense(10)
-    ])
+    model = lib.Autoencoder(latent_dim=64,shape=(IMG_X,IMG_Y,IMG_CHANNELS))
 
-    print(f"Model.output={model.outputs}")
-
-    model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
+    #model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
+    model.compile(optimizer='adam', loss="mse", metrics=['accuracy'])
 
     # Print a summary of the whole model
     model.summary()
