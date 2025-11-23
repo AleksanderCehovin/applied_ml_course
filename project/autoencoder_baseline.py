@@ -9,7 +9,7 @@ import dataset
 import lib
 
 # Variables
-epochs = 10
+epochs = 30
 batch_size=32
 
 def load_data() -> dict:
@@ -27,7 +27,7 @@ def run() -> None:
     IMG_CHANNELS = train_ds.element_spec[0].shape[3]
     print(f"Shape {train_ds.element_spec[0].shape}")
 
-    model = lib.Autoencoder(latent_dim=32,shape=(IMG_X,IMG_Y,IMG_CHANNELS))
+    model = lib.Autoencoder(latent_dim=64,shape=(IMG_X,IMG_Y,IMG_CHANNELS))
 
     model.compile(optimizer='adam', loss="mse")
 
