@@ -11,6 +11,7 @@ import lib
 # Variables
 epochs = 5
 batch_size=32
+latent_dim=32
 
 def load_data() -> dict:
     return dataset.get_data(batch_size=batch_size,is_autoencoder=True)
@@ -27,7 +28,7 @@ def run(dataset) -> None:
     IMG_CHANNELS = train_ds.element_spec[0].shape[3]
     print(f"Shape {train_ds.element_spec[0].shape}")
 
-    model = lib.Autoencoder(latent_dim=64,shape=(IMG_X,IMG_Y,IMG_CHANNELS))
+    model = lib.Autoencoder(latent_dim=latent_dim,shape=(IMG_X,IMG_Y,IMG_CHANNELS))
 
     model.compile(optimizer='adam', loss="mse")
 
