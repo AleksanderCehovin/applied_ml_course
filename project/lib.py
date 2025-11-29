@@ -26,6 +26,45 @@ class Autoencoder(tf.keras.Model):
     decoded = self.decoder(encoded)
     return decoded
 
+  def train_step(self, data):
+    # Unpack data
+    x, y = data
+
+    with tf.GradientTape() as tape:
+        y_pred = self(x, training=True)
+        loss = self.compiled_loss(y, y_pred)
+
+        # Apply gradients
+        trainable_vars = self.trainable_variables
+        gradients = tape.gradient(loss, trainable_vars)
+        self.optimizer.apply_gradients(zip(gradients, trainable_vars))
+
+        # Update standard metrics
+        self.compiled_metrics.update_state(y, y_pred)
+        
+        # Custom metric using input and output
+        custom_metric_value = tf.reduce_mean(tf.abs(x - y_pred))
+
+        # Return dict of results (appears in History)
+        results = {m.name: m.result() for m in self.metrics}
+        results["loss"] = loss
+        results["custom_reconstruction_error"] = custom_metric_value
+        return results
+
+  def test_step(self, data):
+    x, y = data
+    y_pred = self(x, training=False)
+    loss = self.compiled_loss(y, y_pred)
+
+    self.compiled_metrics.update_state(y, y_pred)
+
+    custom_metric_value = tf.reduce_mean(tf.abs(x - y_pred))
+
+    results = {m.name: m.result() for m in self.metrics}
+    results["loss"] = loss
+    results["custom_reconstruction_error"] = custom_metric_value
+    return results
+
 
 #shape = x_test.shape[1:]
 #latent_dim = 64

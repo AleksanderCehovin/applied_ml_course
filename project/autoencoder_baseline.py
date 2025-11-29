@@ -51,14 +51,24 @@ def plot(history) -> None:
     # Visualize loss plots. No accuracy for autoencoder case
     loss = history.history['loss']
     val_loss = history.history['val_loss']
+    custom = history.history['custom_reconstruction_error']
+    val_custom = history.history['val_custom_reconstruction_error']
+    print(f"Available keys in history: {history.history.keys()}")
 
     epochs_range = range(epochs)
 
     plt.figure(figsize=(8, 8))
+    plt.subplot(1,2,1)
     plt.plot(epochs_range, loss, label='Training Loss')
     plt.plot(epochs_range, val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
     plt.title('Training and Validation Loss')
+    
+    plt.subplot(1,2,2)
+    plt.plot(epochs_range, custom, label='Custom')
+    plt.plot(epochs_range, val_custom, label='Validation Custom')
+    plt.legend(loc='upper right')
+    plt.title("Custom Metrics")
     plt.show()
 
 
