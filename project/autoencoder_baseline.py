@@ -10,9 +10,9 @@ import dataset
 import lib
 
 # Variables
-epochs = 5
+epochs = 100
 batch_size=32
-latent_dim=128
+latent_dim=392
 
 def load_data() -> dict:
     return dataset.get_data(batch_size=batch_size,is_autoencoder=True)
@@ -60,30 +60,36 @@ def plot(history) -> None:
     custom = history.history['custom_reconstruction_error']
     val_custom = history.history['val_custom_reconstruction_error']
     compression_ratio = history.history['compression_ratio']
+    compression_ratio_lossy = history.history['compression_ratio_lossy']
     total_original_size = history.history['total_original_size']
     total_feature_size = history.history['total_feature_size']
     total_error_correction_size = history.history['total_error_correction_size']
+    x_ratio = history.history['x_ratio']
+    e_ratio = history.history['e_ratio']
     print(f"Available keys in history: {history.history.keys()}")
 
     epochs_range = range(epochs)
 
-    plt.figure(figsize=(8, 8))
-    plt.subplot(1,3,1)
+    plt.figure(figsize=(12, 8))
+    plt.subplot(3,1,1)
     plt.plot(epochs_range, loss, label='Training Loss')
     plt.plot(epochs_range, val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
     plt.title('Training and Validation Loss')
     
-    plt.subplot(1,3,2)
-    plt.plot(epochs_range, compression_ratio,'bs-',label='Compression Ratio')
-    plt.plot(epochs_range, total_original_size,'r--', label='Total Original Size')
-    plt.plot(epochs_range, total_feature_size,'gs-', label='Total Feature Size')
-    plt.plot(epochs_range, total_error_correction_size,'ms', label='Total Error Correction Size')
+    plt.subplot(3,1,2)
+    plt.plot(epochs_range, compression_ratio,'bs-',label='Compression Ratio Lossless')
+    plt.plot(epochs_range, compression_ratio_lossy,'rs-', label='Compression Ratio Lossy')
+    #plt.plot(epochs_range, total_original_size,'r--', label='Total Original Size')
+    #plt.plot(epochs_range, total_feature_size,'gs-', label='Total Feature Size')
+    #plt.plot(epochs_range, total_error_correction_size,'ms', label='Total Error Correction Size')
     plt.legend(loc='upper right')
     plt.title("Custom Metrics")
 
-    plt.subplot(1,3,3)
-    plt.plot(epochs_range, custom,'bs-',label='Compression Error')
+    plt.subplot(3,1,3)
+    plt.plot(epochs_range, custom,'bs-',label='Custom Reconstruction Error')
+    plt.plot(epochs_range, x_ratio,'r--', label='X Ratio')
+    plt.plot(epochs_range, e_ratio,'gs-', label='E Ratio')
     plt.legend(loc='upper right')
     plt.title("Custom Error Correction Metrics")
 
@@ -102,28 +108,40 @@ def plot_reconstruction_examples(model, dataset, N=5):
         #print(f"preds.shape {preds.shape}")
         #print(f"image.shape {image.shape}")
 
-    plt.figure(figsize=(2*N,4))
+    plt.figure(figsize=(2*N,7))
     for i in range(0,N):
         # Original image
-        ax = plt.subplot(2,N,i+1)
+        ax = plt.subplot(3,N,i+1)
         plt.imshow(image[i].numpy().squeeze(), cmap="gray")
         plt.title("original")
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
         # Predicted image
-        ax = plt.subplot(2, N, i+1+N)
+        ax = plt.subplot(3, N, i+1+N)
         plt.imshow(preds[i], cmap="gray")
         plt.title("reconstructed")
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
+    
+        # Difference
+        ax = plt.subplot(3, N, i+1+2*N)
+        plt.imshow(np.abs(image[i]-preds[i]), cmap="gray")
+        min_val = tf.reduce_min(image[i]-preds[i])
+        max_val = tf.reduce_max(image[i]-preds[i])
+        avg_val = tf.reduce_mean(image[i]-preds[i])
+        plt.title(f"|diff|[min,avg,max]\n[{min_val:.2f},{avg_val:.2f},{max_val:.2f}]")
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+
+
     plt.show()
 
 def run_all() -> None:
     dataset = load_data()
     model, history=run(dataset)
     plot(history)
-    plot_reconstruction_examples(model, dataset['test'], 10)
+    plot_reconstruction_examples(model, dataset['test'], 5)
     #DEBUG
     return model.sample
 
