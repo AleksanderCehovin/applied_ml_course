@@ -6,29 +6,56 @@ import dataset
 import zlib
 
 class Autoencoder(tf.keras.Model):
-  def __init__(self, latent_dim=64, shape=(28,28,1)):
+  
+  def __init__(self, latent_dim=64, shape=(28,28,1), isDense=True):
     super(Autoencoder, self).__init__()
     self.latent_dim = latent_dim
     self.shape = shape
-    self.encoder = tf.keras.Sequential([
-      tf.keras.layers.Input(shape),
-      #tf.keras.layers.Rescaling(1./255),
-      tf.keras.layers.Flatten(),
-      tf.keras.layers.Dense(5*latent_dim, activation='relu'),      
-      tf.keras.layers.Dense(3*latent_dim, activation='relu'),      
-      tf.keras.layers.Dense(latent_dim, activation='relu'),
-    ])
-    print(f"Autoencode:init: {np.prod(shape)}")
-    self.decoder = tf.keras.Sequential([
-      tf.keras.layers.Dense(3*latent_dim, activation='relu'),
-      tf.keras.layers.Dense(5*latent_dim, activation='relu'),
-      tf.keras.layers.Dense(np.prod(shape), activation='sigmoid'),
-      tf.keras.layers.Reshape(shape),
-    ])
+    # Define encoder and decoder
+    self.encoder, self.decoder = self.define_model(isDense)
+    # Parameters for compression metrics
     self.entropy_noise_stddev = 0.001
     self.image_error_threshold = 0.05
     #DEBUG
     self.sample = {"x": None, "y": None, "y_feature": None}
+
+  def define_model(self, isDense=True):
+    if isDense:
+      print("Autoencoder with dense layers")
+      encoder = tf.keras.Sequential([
+        tf.keras.layers.Input(self.shape),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(5*self.latent_dim, activation='relu'),      
+        tf.keras.layers.Dense(3*self.latent_dim, activation='relu'),      
+        tf.keras.layers.Dense(self.latent_dim, activation='relu'),
+      ])
+      decoder = tf.keras.Sequential([
+        tf.keras.layers.Dense(3*self.latent_dim, activation='relu'),
+        tf.keras.layers.Dense(5*self.latent_dim, activation='relu'),
+        tf.keras.layers.Dense(np.prod(self.shape), activation='sigmoid'),
+        tf.keras.layers.Reshape(self.shape),
+      ])
+    else:
+      print("Autoencoder with convolutional layers")
+      encoder = tf.keras.Sequential([
+        tf.keras.layers.Input(self.shape),
+        tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
+        tf.keras.layers.MaxPooling2D(padding='same'),
+        tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
+        tf.keras.layers.MaxPooling2D(padding='same'),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(self.latent_dim, activation='relu')
+      ])
+      decoder = tf.keras.Sequential([
+        tf.keras.layers.Dense(7*7*32, activation='relu'),  # Reshape to spatial dims
+        tf.keras.layers.Reshape((7, 7, 32)),
+        tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
+        tf.keras.layers.UpSampling2D(),
+        tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
+        tf.keras.layers.UpSampling2D(),
+        tf.keras.layers.Conv2D(1, 3, padding='same', activation='sigmoid'),
+      ])
+    return encoder, decoder
 
   def call(self, x):
     encoded = self.encoder(x)

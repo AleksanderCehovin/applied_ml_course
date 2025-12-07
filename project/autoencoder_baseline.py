@@ -17,7 +17,7 @@ latent_dim=392
 def load_data() -> dict:
     return dataset.get_data(batch_size=batch_size,is_autoencoder=True)
 
-def run(dataset) -> None:
+def run(dataset, isDense=False) -> None:
     dataset = load_data()    
     train_ds = dataset["train"]
     validate_ds = dataset["validate"]
@@ -29,7 +29,7 @@ def run(dataset) -> None:
     IMG_CHANNELS = train_ds.element_spec[0].shape[3]
     print(f"Shape {train_ds.element_spec[0].shape}")
 
-    model = lib.Autoencoder(latent_dim=latent_dim,shape=(IMG_X,IMG_Y,IMG_CHANNELS))
+    model = lib.Autoencoder(latent_dim=latent_dim,shape=(IMG_X,IMG_Y,IMG_CHANNELS),isDense=isDense)
 
     # run_eagerly=True for debugging purposes, but makes training much slower.
     # See eagerly vs graph mode in TF documentation for details.
@@ -139,9 +139,9 @@ def plot_reconstruction_examples(model, dataset, N=5):
 
     plt.show()
 
-def run_all() -> None:
+def run_all(isDense=False) -> None:
     dataset = load_data()
-    model, history=run(dataset)
+    model, history=run(dataset,isDense)
     plot(history)
     plot_reconstruction_examples(model, dataset['test'], 5)
     #DEBUG
