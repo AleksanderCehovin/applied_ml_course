@@ -91,7 +91,7 @@ def plot(history) -> None:
 
     plt.subplot(3,1,3)
     plt.ylim(0,1.1*max(custom + e_ratio))
-    plt.plot(epochs_range, custom,'bs-',label='Custom Reconstruction Error')
+    plt.plot(epochs_range, custom,'bs-',label='Custom Reconstruction Error $\Sigma$|prediction error|/$\Sigma$|image|')
     plt.legend(loc='upper right')
     plt.title("Custom Error Correction Metrics")
 
