@@ -12,7 +12,7 @@ import lib
 # Variables
 epochs = 5
 batch_size=32
-latent_dim=64
+latent_dim=128
 
 def load_data() -> dict:
     return dataset.get_data(batch_size=batch_size,is_autoencoder=True)
@@ -73,7 +73,7 @@ def plot(history) -> None:
 
     epochs_range = range(epochs)
 
-    plt.figure(figsize=(12, 9))
+    plt.figure(figsize=(12, 10))
     plt.subplot(3,1,1)
     plt.plot(epochs_range, loss, label='Training Loss')
     plt.plot(epochs_range, val_loss, label='Validation Loss')
@@ -82,18 +82,19 @@ def plot(history) -> None:
     
     plt.subplot(3,1,2)
     plt.ylim(0,1.1*max(compression_ratio + compression_ratio_lossy + x_ratio_noise + e_ratio))
-    plt.plot(epochs_range, compression_ratio,'bs-',label='Compression Ratio + Error>|{image_error_threshold}| ')
+    plt.plot(epochs_range, compression_ratio,'bs-',label=f'Compression Ratio + Error>|{image_error_threshold}| ')
     plt.plot(epochs_range, compression_ratio_lossy,'rs-', label='Compression Ratio')
-    plt.plot(epochs_range, x_ratio_noise,'m--', label=f'Image+/-|{entropy_noise_stddev}| Compression Ratio')
-    plt.plot(epochs_range, e_ratio,'gs-', label='Error Compression Ratio')
+    plt.plot(epochs_range, x_ratio_noise,'m--', label=f'[Image+/-|{entropy_noise_stddev}|] Compression Ratio')
+    plt.plot(epochs_range, x_ratio,'m:', label=f'Image Compression Ratio')
+    #plt.plot(epochs_range, e_ratio,'gs-', label='Error Compression Ratio')
     plt.legend(loc='upper right')
-    plt.title("Custom Metrics")
+    plt.title(f"Custom Metrics: Autoencoder Latent Dimension={latent_dim}")
 
     plt.subplot(3,1,3)
     plt.ylim(0,1.1*max(custom + e_ratio))
-    plt.plot(epochs_range, custom,'bs-',label=r'Custom Reconstruction Error Ratio: $\Sigma$|prediction error|/$\Sigma$|image|')
+    plt.plot(epochs_range, custom,'bs-',label=r'Autoencoder Reconstruction Error Ratio: $\Sigma$|prediction error|/$\Sigma$|image|')
     plt.legend(loc='upper right')
-    plt.title("Custom Error Correction Ratio")
+    plt.title("Autoencoder Custom Error Correction Ratio")
 
 
     plt.show()
@@ -111,6 +112,7 @@ def plot_reconstruction_examples(model, dataset, N=5):
         #print(f"image.shape {image.shape}")
 
     plt.figure(figsize=(2*N,7))
+    plt.title("Autoencoder reconstruction examples [No extra error correction]")
     for i in range(0,N):
         # Original image
         ax = plt.subplot(3,N,i+1)

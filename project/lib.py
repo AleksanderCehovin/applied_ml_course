@@ -139,9 +139,9 @@ class Autoencoder(tf.keras.Model):
     if total_original_size == 0:
         return 0.0
     # dataset ratio of zlib(Autoencoder feature+error correction)/zlib(Original image)
-    compression_ratio = (total_compressed_feature_size + total_compressed_error_correction_size) / total_compressed_original_size
+    compression_ratio = (total_compressed_feature_size + total_compressed_error_correction_size) / total_original_size
     # Dataset ratio of zlib(Autoencoder feature)/zlib(Original image)
-    compression_ratio_lossy = total_compressed_feature_size  / total_compressed_original_size
+    compression_ratio_lossy = total_compressed_feature_size  / total_original_size
     # Dataset ratio of zlib(Original image)/Original image
     x_ratio = total_compressed_original_size / total_original_size
     # Dataset ratio of zlib(Original image + minimal noise)/Raw image + minimal noise
