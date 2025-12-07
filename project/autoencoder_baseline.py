@@ -10,7 +10,7 @@ import dataset
 import lib
 
 # Variables
-epochs = 100
+epochs = 10
 batch_size=32
 latent_dim=392
 
@@ -65,7 +65,10 @@ def plot(history) -> None:
     total_feature_size = history.history['total_feature_size']
     total_error_correction_size = history.history['total_error_correction_size']
     x_ratio = history.history['x_ratio']
+    x_ratio_noise = history.history['x_ratio_noise']
     e_ratio = history.history['e_ratio']
+    image_error_threshold = history.history['image_error_threshold'][0]
+    entropy_noise_stddev = history.history['entropy_noise_stddev'][0]
     print(f"Available keys in history: {history.history.keys()}")
 
     epochs_range = range(epochs)
@@ -78,18 +81,17 @@ def plot(history) -> None:
     plt.title('Training and Validation Loss')
     
     plt.subplot(3,1,2)
-    plt.plot(epochs_range, compression_ratio,'bs-',label='Compression Ratio Lossless')
-    plt.plot(epochs_range, compression_ratio_lossy,'rs-', label='Compression Ratio Lossy')
-    #plt.plot(epochs_range, total_original_size,'r--', label='Total Original Size')
-    #plt.plot(epochs_range, total_feature_size,'gs-', label='Total Feature Size')
-    #plt.plot(epochs_range, total_error_correction_size,'ms', label='Total Error Correction Size')
+    plt.ylim(0,1.1*max(compression_ratio + compression_ratio_lossy + x_ratio_noise + e_ratio))
+    plt.plot(epochs_range, compression_ratio,'bs-',label=f'Compression Ratio + Error>|{image_error_threshold}| ')
+    plt.plot(epochs_range, compression_ratio_lossy,'rs-', label='Compression Ratio')
+    plt.plot(epochs_range, x_ratio_noise,'m--', label=f'Image+/-|{entropy_noise_stddev}| Compression Ratio')
+    plt.plot(epochs_range, e_ratio,'gs-', label='Error Compression Ratio')
     plt.legend(loc='upper right')
     plt.title("Custom Metrics")
 
     plt.subplot(3,1,3)
+    plt.ylim(0,1.1*max(custom + e_ratio))
     plt.plot(epochs_range, custom,'bs-',label='Custom Reconstruction Error')
-    plt.plot(epochs_range, x_ratio,'r--', label='X Ratio')
-    plt.plot(epochs_range, e_ratio,'gs-', label='E Ratio')
     plt.legend(loc='upper right')
     plt.title("Custom Error Correction Metrics")
 
