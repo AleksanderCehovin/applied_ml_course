@@ -10,7 +10,7 @@ import dataset
 import lib
 
 # Variables
-epochs = 5
+epochs=50
 batch_size=32
 latent_dim=128
 
@@ -139,12 +139,12 @@ def plot_reconstruction_examples(model, dataset, N=5):
     
     plt.show()
 
-def run_model(isDense=False):
+def run_model(isDense=True):
     dataset = load_data()
     model, history=run(dataset,isDense)
     return dataset, model, history
 
-def run_all(isDense=False) -> None:
+def run_all(isDense=True) -> None:
     dataset, model, history=run_model(isDense)
     plot(history)
     plot_reconstruction_examples(model, dataset['test'], 5)
