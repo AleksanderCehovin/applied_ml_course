@@ -82,11 +82,10 @@ def plot(history) -> None:
     
     plt.subplot(3,1,2)
     plt.ylim(0,1.1*max(compression_ratio + compression_ratio_lossy + x_ratio_noise + e_ratio))
-    plt.plot(epochs_range, compression_ratio,'bs-',label=f'Compression Ratio + Error>|{image_error_threshold}| ')
-    plt.plot(epochs_range, compression_ratio_lossy,'rs-', label='Compression Ratio')
-    plt.plot(epochs_range, x_ratio_noise,'m--', label=f'[Image+/-|{entropy_noise_stddev}|] Compression Ratio')
-    plt.plot(epochs_range, x_ratio,'m:', label=f'Image Compression Ratio')
-    #plt.plot(epochs_range, e_ratio,'gs-', label='Error Compression Ratio')
+    plt.plot(epochs_range, compression_ratio,'bs-',label=f'Compression Ratio zlib(Feature+ Error>|{image_error_threshold}|)/original images')
+    plt.plot(epochs_range, compression_ratio_lossy,'rs-', label='Compression Ratio zlib(Feature only)/original images')
+    plt.plot(epochs_range, x_ratio_noise,'m--', label=f'Compression Ratio zlib(original images+/-|{entropy_noise_stddev}| noise)/original images')
+    plt.plot(epochs_range, x_ratio,'m:', label=f'Compression Ratio zlib(original images)/original images')
     plt.legend(loc='upper right')
     plt.title(f"Custom Metrics: Autoencoder Latent Dimension={latent_dim}")
 
