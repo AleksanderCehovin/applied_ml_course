@@ -111,7 +111,7 @@ def plot_reconstruction_examples(model, dataset, N=5):
         #print(f"preds.shape {preds.shape}")
         #print(f"image.shape {image.shape}")
 
-    plt.figure(figsize=(2*N,7))
+    plt.figure(figsize=(2.5*N,9))
     plt.title("Autoencoder reconstruction examples [No extra error correction]")
     for i in range(0,N):
         # Original image
@@ -137,17 +137,20 @@ def plot_reconstruction_examples(model, dataset, N=5):
         plt.title(f"|diff|[min,avg,max]\n[{min_val:.2f},{avg_val:.2f},{max_val:.2f}]")
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
-
+    
     plt.show()
 
-def run_all(isDense=False) -> None:
+def run_model(isDense=False):
     dataset = load_data()
     model, history=run(dataset,isDense)
+    return dataset, model, history
+
+def run_all(isDense=False) -> None:
+    dataset, model, history=run_model(isDense)
     plot(history)
     plot_reconstruction_examples(model, dataset['test'], 5)
     #DEBUG
     return model.sample
-
 
 if __name__ == "__main__":
     run_all()
