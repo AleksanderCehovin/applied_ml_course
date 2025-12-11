@@ -29,6 +29,7 @@ def run(dataset, isDense=False) -> None:
     IMG_CHANNELS = train_ds.element_spec[0].shape[3]
     print(f"Shape {train_ds.element_spec[0].shape}")
 
+    # Define the model. We can choose between dense or convolutional layers with the isDense flasg    
     model = lib.Autoencoder(latent_dim=latent_dim,shape=(IMG_X,IMG_Y,IMG_CHANNELS),isDense=isDense)
 
     # run_eagerly=True for debugging purposes, but makes training much slower.
@@ -54,7 +55,9 @@ def run(dataset, isDense=False) -> None:
     return model, history
 
 def plot(history) -> None:
-    # Visualize loss plots. No accuracy for autoencoder case
+    # Visualize loss plots. No accuracy for autoencoder case. In this case we
+    # now have many custom metrics avaialble in history.history. These are defines
+    # in lib.CompressionMetricCallback class.
     loss = history.history['loss']
     val_loss = history.history['val_loss']
     custom = history.history['custom_reconstruction_error']
@@ -100,6 +103,15 @@ def plot(history) -> None:
 
 
 def plot_reconstruction_examples(model, dataset, N=5):
+    """
+    Plots N examples of autoencoder reconstructions from the dataset using the model. This
+    gives an idea of how well the autoencoder is performing. The bottom row with absolue errors
+    are the type of error that the sparse error matrices would correct.
+    
+    :param model: Description
+    :param dataset: Description
+    :param N: Description
+    """
     assert N < batch_size, "N must be smaller than a batch_size"
     
     # Randomize images so we don't check the same ones every time
@@ -148,7 +160,7 @@ def run_all(isDense=True) -> None:
     dataset, model, history=run_model(isDense)
     plot(history)
     plot_reconstruction_examples(model, dataset['test'], 5)
-    #DEBUG
+    #DEBUG. Only run on small subset of test data for speed in Eagerly mode
     return model.sample
 
 if __name__ == "__main__":

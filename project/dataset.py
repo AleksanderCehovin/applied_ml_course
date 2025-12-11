@@ -18,7 +18,8 @@ def get_data(batch_size=32,is_autoencoder=False) -> dict:
     )
     
     if(is_autoencoder):
-        # Apply preprocessing, remove labels for autoencoder training
+        # Apply preprocessing that normalizes the image, remove labels for autoencoder training.
+        # Autotune is performande relatred for optimal batch processing
         ds[0] = ds[0].map(autoencoder_preprocess).shuffle(10000).prefetch(tf.data.AUTOTUNE)
         ds[1] = ds[1].map(autoencoder_preprocess).prefetch(tf.data.AUTOTUNE)
         ds[2] = ds[2].map(autoencoder_preprocess).prefetch(tf.data.AUTOTUNE)

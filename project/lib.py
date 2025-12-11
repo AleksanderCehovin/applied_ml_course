@@ -6,6 +6,10 @@ import dataset
 import zlib
 
 class Autoencoder(tf.keras.Model):
+  """
+  Autoencoder model class that defines an encoder and decoder. Supports both dense
+  and convolutional architectures based on the isDense flag.
+  """
   
   def __init__(self, latent_dim=64, shape=(28,28,1), isDense=True):
     super(Autoencoder, self).__init__()
@@ -63,6 +67,19 @@ class Autoencoder(tf.keras.Model):
     return decoded
 
   def train_step(self, data) -> dict:
+    """
+    This is where the training step is defined for custom training loops. From what I understand,
+    all of the custom metric in this project couuld be defined here instead of subclassing the
+    tf.keras.callbacks.Callback class. At the time I did not know how to fully defince custom functions
+    that support both the eagerly and graph modes, so I used the Callback class instead. It seems that
+    with the correct decorators one can define custom metrics that can be debugged in eagerly mode and
+    once verified, run in graph mode for performance.
+    
+    :param self: Description
+    :param data: Description
+    :return: Description
+    :rtype: dict
+    """
     # Unpack data
     x, y = data
 
@@ -71,7 +88,7 @@ class Autoencoder(tf.keras.Model):
         y_feature = self.encoder(x)
         loss = self.compiled_loss(y, y_pred)
 
-        #Just save some samples for debugging
+        #Just save some samples for debugging in eagerly mode
         #self.sample["x"]=x
         #self.sample["y"]=y
         #self.sample["y_pred"]=y_pred        
@@ -96,6 +113,11 @@ class Autoencoder(tf.keras.Model):
         return results
 
   def compute_compression_metrics(self, dataset) -> dict:
+    """
+    Most of the custom metric are defined here. In this implementation this part is executed by the
+    CompressionMetricCallback at the end of each epoch. This way, the main model can the executed in
+    graph mode for performance, while this part can be executed in eagerly mode for easier debugging.
+    """
     total_original_size = 0
     total_original_noise_size = 0
     total_feature_size = 0
@@ -104,7 +126,7 @@ class Autoencoder(tf.keras.Model):
     total_compressed_original_noise_size = 0
     total_compressed_feature_size = 0
     total_compressed_error_correction_size = 0
-    # TODO: Maybe actually run compression on each image separately
+
     for batch in dataset:
         x, y = batch
         y_pred = self(x, training=False)
@@ -138,15 +160,15 @@ class Autoencoder(tf.keras.Model):
         total_error_correction_size += len(error_bytes)
     if total_original_size == 0:
         return 0.0
-    # dataset ratio of zlib(Autoencoder feature+error correction)/zlib(Original image)
+    # dataset ratio of zlib(Autoencoder feature+error correction)/Original images
     compression_ratio = (total_compressed_feature_size + total_compressed_error_correction_size) / total_original_size
-    # Dataset ratio of zlib(Autoencoder feature)/zlib(Original image)
+    # Dataset ratio of zlib(Autoencoder feature)/Original images
     compression_ratio_lossy = total_compressed_feature_size  / total_original_size
-    # Dataset ratio of zlib(Original image)/Original image
+    # Dataset ratio of zlib(Original image)/Original images
     x_ratio = total_compressed_original_size / total_original_size
-    # Dataset ratio of zlib(Original image + minimal noise)/Raw image + minimal noise
+    # Dataset ratio of zlib(Original image + minimal noise)/Raw images + minimal noise
     x_ratio_noise = total_compressed_original_noise_size / total_original_noise_size
-    # Dataset ratio of zlib(Error correction/Raw error correction)
+    # Dataset ratio of zlib(Error correction)/Raw error correction
     e_ratio = total_compressed_error_correction_size / total_error_correction_size
     return {"compression_ratio": compression_ratio, 
             "compression_ratio_lossy": compression_ratio_lossy, 
@@ -176,6 +198,12 @@ class Autoencoder(tf.keras.Model):
     return results
 
 class CompressionMetricCallback(tf.keras.callbacks.Callback):
+    """
+    This callback computes custom compression metrics at the end of each epoch. It
+    is defined as a callback so that the main model can be executed in graph mode
+    for performance, while this part can be executed in eagerly mode for easier debugging.
+    It is specified in the model.fit() call as a callback.
+    """
     def __init__(self, dataset):
         super().__init__()
         self.dataset = dataset
